@@ -1,3 +1,4 @@
+
 const input = document.getElementById("task-input");
 const addBtn = document.getElementById("add-btn");
 const list = document.getElementById("task-list");
@@ -12,18 +13,29 @@ let nextId = 1;
 
 function addTask() {
   const text = input.value.trim();
+
   if (text === "") {
     errorEl.hidden = false;
     return;
   }
+
   errorEl.hidden = true;
-  tasks.push({ id: nextId++, text: text, done: false });
+
+  tasks.push({
+    id: nextId++,
+    text: text,
+    done: false
+  });
+
   input.value = "";
   render();
 }
 
 function toggleTask(id) {
   const task = tasks.find((t) => t.id === id);
+
+  if (!task) return;
+
   task.done = !task.done;
   render();
 }
@@ -43,7 +55,7 @@ function getVisibleTasks() {
     return tasks.filter((t) => !t.done);
   }
 
-  if (currentFilter === "completed") {
+  if (currentFilter === "done") {
     return tasks.filter((t) => t.done);
   }
 
@@ -55,41 +67,63 @@ function updateCounter() {
   counter.textContent = "Активных задач: " + activeCount;
 }
 
-
 function render() {
   list.innerHTML = "";
+
   const visible = getVisibleTasks();
+
   for (let i = 0; i < visible.length; i++) {
     const task = visible[i];
+
     const li = document.createElement("li");
     li.className = "task";
+
     if (task.done) {
-      li.classList.add("completed");
+      li.classList.add("done");
     }
 
     const span = document.createElement("span");
     span.className = "task__text";
     span.textContent = task.text;
-    span.addEventListener("click", () => toggleTask(task.id));
+
+    span.addEventListener("click", () => {
+      toggleTask(task.id);
+    });
 
     const del = document.createElement("button");
+    del.type = "button";
     del.className = "task__del";
     del.textContent = "✕";
-    del.addEventListener("click", () => deleteTask(task.id));
+
+    del.addEventListener("click", () => {
+      deleteTask(task.id);
+    });
 
     li.appendChild(span);
     li.appendChild(del);
     list.appendChild(li);
   }
+
   updateCounter();
 }
 
 addBtn.addEventListener("click", addTask);
+
+input.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    addTask();
+  }
+});
+
 clearBtn.addEventListener("click", clearCompleted);
 
 filterButtons.forEach((btn) => {
   btn.addEventListener("click", () => {
-    filterButtons.forEach((b) => b.classList.remove("active"));
+    filterButtons.forEach((b) => {
+      b.classList.remove("active");
+    });
+
     btn.classList.add("active");
     currentFilter = btn.dataset.filter;
     render();
